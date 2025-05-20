@@ -10,6 +10,7 @@ import com.recipevault.model.Difficulty;
 import com.recipevault.repository.RecipeRepository;
 import com.recipevault.service.RecipeService;
 import com.recipevault.dto.RecipeResponseDTO;
+import com.recipevault.dto.RecipeUpdateDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -127,28 +128,23 @@ public class RecipeController {
 
     // PUT /recipes
     @PutMapping("/{id}")
-    public ResponseEntity<Recipe> updateRecipe(@PathVariable Long id, @RequestBody Recipe updatedRecipe) {
-        return recipeRepository.findById(id)
-                .map(recipe -> {
-                    recipe.setTitle(updatedRecipe.getTitle());
-                    recipe.setDifficulty(updatedRecipe.getDifficulty());
-                    recipe.setInstructions(updatedRecipe.getInstructions());
-                    recipe.setImageUrl(updatedRecipe.getImageUrl());
-                    recipe.setCreatorName(updatedRecipe.getCreatorName());
-                    return new ResponseEntity<>(recipeRepository.save(recipe), HttpStatus.OK);
-                })
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<RecipeResponseDTO> updateRecipe(
+            @PathVariable Long id,
+            @RequestBody RecipeUpdateDTO dto) {
+        return ResponseEntity.ok(recipeService.updateRecipe(id, dto));
     }
 
+    //DELETE /recipes
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteRecipe(@PathVariable Long id) {
-        if (recipeRepository.existsById(id)) {
-            recipeRepository.deleteById(id);
-            return new ResponseEntity<>("Recipe deleted successfully.", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Recipe not found.", HttpStatus.NOT_FOUND);
+        try {
+            recipeService.deleteRecipe(id);
+            return ResponseEntity.ok("Recipe deleted successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
 
 }
 

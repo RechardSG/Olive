@@ -7,6 +7,8 @@ import com.recipevault.dto.RecipeCreateDTO;
 import com.recipevault.dto.RecipeResponseDTO;
 import com.recipevault.repository.RecipeRepository;
 import com.recipevault.service.RecipeService;
+import com.recipevault.dto.RecipeUpdateDTO;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -107,5 +109,44 @@ public class RecipeServiceImpl implements RecipeService {
         });
     }
 
+    @Override
+    public RecipeResponseDTO updateRecipe(Long id, RecipeUpdateDTO dto) {
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Recipe not found"));
+
+        recipe.setTitle(dto.getTitle());
+        recipe.setInstructions(dto.getInstructions());
+        recipe.setDifficulty(Difficulty.valueOf(dto.getDifficulty()));
+        recipe.setCreatorName(dto.getCreatorName());
+
+        // rebuild ingredients
+        List<Ingredient> ingredients = dto.getIngredients().stream()
+                .map(name -> new Ingredient(name, recipe))
+                .toList();
+
+        recipe.getIngredients().clear();
+        recipe.getIngredients().addAll(ingredients);
+
+        Recipe saved = recipeRepository.save(recipe);
+
+        RecipeResponseDTO response = new RecipeResponseDTO();
+        response.setId(saved.getId());
+        response.setTitle(saved.getTitle());
+        response.setInstructions(saved.getInstructions());
+        response.setDifficulty(saved.getDifficulty().name());
+        response.setCreatorName(saved.getCreatorName());
+        response.setCreatedDate(saved.getCreatedDate());
+        response.setIngredients(saved.getIngredients().stream().map(Ingredient::getName).toList());
+
+        return response;
+    }
+
+    @Override
+    public void deleteRecipe(Long id) {
+        if (!recipeRepository.existsById(id)) {
+            throw new RuntimeException("Recipe not found");
+        }
+        recipeRepository.deleteById(id);
+    }
 
 }
