@@ -1,7 +1,7 @@
-package com.recipevault.recipe;
+package com.recipevault.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.recipevault.recipe.Ingredient;
+import com.recipevault.model.Ingredient;
 
 public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
 }

@@ -1,4 +1,4 @@
-package com.recipevault.recipe;
+package com.recipevault.model;
 
 public enum Difficulty {
     EASY,

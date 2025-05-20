@@ -1,4 +1,6 @@
-package com.recipevault.recipe;
+package com.recipevault.repository;
+import com.recipevault.model.Recipe;
+import com.recipevault.model.Difficulty;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

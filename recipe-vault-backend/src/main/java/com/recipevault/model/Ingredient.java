@@ -1,4 +1,4 @@
-package com.recipevault.recipe;
+package com.recipevault.model;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;

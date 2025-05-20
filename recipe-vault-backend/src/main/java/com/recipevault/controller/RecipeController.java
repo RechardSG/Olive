@@ -2,7 +2,14 @@
 *
 * */
 
-package com.recipevault.recipe;
+package com.recipevault.controller;
+
+import com.recipevault.model.Recipe;
+import com.recipevault.model.Ingredient;
+import com.recipevault.model.Difficulty;
+import com.recipevault.repository.RecipeRepository;
+import com.recipevault.service.RecipeService;
+import com.recipevault.dto.RecipeResponseDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,18 +38,12 @@ public class RecipeController {
 
     // GET /recipes
     @GetMapping("/paged")
-    public Page<Recipe> getPagedRecipes(
+    public Page<RecipeResponseDTO> getPagedRecipes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Recipe> pagedRecipes = recipeRepository.findAll(pageable);
-
-        // Force ingredients to load (to avoid lazy loading issues)
-        pagedRecipes.getContent().forEach(recipe -> recipe.getIngredients().size());
-
-        return pagedRecipes;
+        return recipeService.getPagedRecipes(page, size);
     }
+
 
     @GetMapping("/filter")
     public ResponseEntity<List<Recipe>> filterRecipes(
@@ -72,16 +73,15 @@ public class RecipeController {
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
+    @Autowired
+    private RecipeService recipeService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Recipe> getRecipeById(@PathVariable Long id) {
-        return recipeRepository.findById(id)
-                .map(recipe -> {
-                    // Force ingredients to load (important if FetchType.LAZY)
-                    recipe.getIngredients().size();
-                    return new ResponseEntity<>(recipe, HttpStatus.OK);
-                })
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<RecipeResponseDTO> getRecipeById(@PathVariable Long id) {
+        RecipeResponseDTO dto = recipeService.getRecipeById(id);
+        return (dto != null) ?
+                new ResponseEntity<>(dto, HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("")
