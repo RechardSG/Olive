@@ -1,6 +1,7 @@
 services:
   - type: web
     name: recipe-vault-backend
+    runtime: docker
     buildCommand: ./mvnw clean install
     startCommand: java -jar target/recipe-vault-backend-0.0.1-SNAPSHOT.jar
     envVars:
