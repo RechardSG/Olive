@@ -10,12 +10,15 @@ import com.recipevault.service.RecipeService;
 import com.recipevault.dto.RecipeUpdateDTO;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class RecipeServiceImpl implements RecipeService {
@@ -91,22 +94,65 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public Page<RecipeResponseDTO> getPagedRecipes(int page, int size) {
+    public Page<RecipeResponseDTO> getPagedRecipes(int page, int size, String title, String difficulty, Integer minIngredients, Integer maxIngredients) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Recipe> pageResult = recipeRepository.findAll(pageable);
+        List<Recipe> all = recipeRepository.findAll();
 
-        return pageResult.map(recipe -> {
-            RecipeResponseDTO dto = new RecipeResponseDTO();
-            dto.setId(recipe.getId());
-            dto.setTitle(recipe.getTitle());
-            dto.setInstructions(recipe.getInstructions());
-            dto.setDifficulty(recipe.getDifficulty().name());
-            dto.setCreatorName(recipe.getCreatorName());
-            dto.setCreatedDate(recipe.getCreatedDate());
-            dto.setIngredients(recipe.getIngredients().stream()
-                    .map(Ingredient::getName).toList());
-            return dto;
-        });
+        Stream<Recipe> stream = all.stream();
+
+        if (title != null && !title.isEmpty()) {
+            stream = stream.filter(r -> r.getTitle().toLowerCase().contains(title.toLowerCase()));
+        }
+
+        if (difficulty != null && !difficulty.isEmpty()) {
+            try {
+                Difficulty diffEnum = Difficulty.valueOf(difficulty.toUpperCase());
+                stream = stream.filter(r -> r.getDifficulty() == diffEnum);
+            } catch (IllegalArgumentException ignored) {}
+        }
+
+        if (minIngredients != null) {
+            stream = stream.filter(r -> r.getIngredients().size() >= minIngredients);
+        }
+
+        if (maxIngredients != null) {
+            stream = stream.filter(r -> r.getIngredients().size() <= maxIngredients);
+        }
+
+        List<Recipe> filtered = stream.collect(Collectors.toList());
+
+        int start = Math.min(page * size, filtered.size());
+        int end = Math.min(start + size, filtered.size());
+        List<Recipe> pageContent = filtered.subList(start, end);
+
+        List<RecipeResponseDTO> responseList = pageContent.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(responseList, pageable, filtered.size());
+    }
+
+    private RecipeResponseDTO convertToResponseDTO(Recipe recipe) {
+        RecipeResponseDTO dto = new RecipeResponseDTO();
+        dto.setId(recipe.getId());
+        dto.setTitle(recipe.getTitle());
+        dto.setDifficulty(recipe.getDifficulty().name());
+        dto.setCreatorName(recipe.getCreatorName());
+        dto.setInstructions(recipe.getInstructions());
+        dto.setImageUrl(recipe.getImageUrl());
+        dto.setCreatedDate(recipe.getCreatedDate());
+
+        if (recipe.getIngredients() != null) {
+            dto.setIngredients(
+                    recipe.getIngredients().stream()
+                            .map(Ingredient::getName)
+                            .collect(Collectors.toList())
+            );
+        } else {
+            dto.setIngredients(Collections.emptyList());
+        }
+
+        return dto;
     }
 
     @Override

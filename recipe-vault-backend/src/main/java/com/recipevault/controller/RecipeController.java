@@ -39,10 +39,16 @@ public class RecipeController {
 
     // GET /recipes
     @GetMapping("/paged")
-    public Page<RecipeResponseDTO> getPagedRecipes(
+    public ResponseEntity<Page<RecipeResponseDTO>> getPagedRecipes(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return recipeService.getPagedRecipes(page, size);
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(required = false) Integer minIngredients,
+            @RequestParam(required = false) Integer maxIngredients) {
+
+        Page<RecipeResponseDTO> results = recipeService.getPagedRecipes(page, size, title, difficulty, minIngredients, maxIngredients);
+        return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
 

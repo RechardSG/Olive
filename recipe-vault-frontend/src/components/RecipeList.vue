@@ -6,6 +6,32 @@ Let user delete (DELETE /recipes/:id)
 
 <template>
   <div>
+    <el-form inline style="margin-bottom: 16px">
+      <el-form-item label="Search Title">
+        <el-input v-model="filters.title" placeholder="Search title" clearable />
+      </el-form-item>
+
+      <el-form-item label="Difficulty">
+        <el-select v-model="filters.difficulty" placeholder="All" clearable>
+          <el-option label="Easy" value="EASY" />
+          <el-option label="Medium" value="MEDIUM" />
+          <el-option label="Hard" value="HARD" />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="Min Ingredients">
+        <el-input-number v-model="filters.minIngredients" :min="0" />
+      </el-form-item>
+
+      <el-form-item label="Max Ingredients">
+        <el-input-number v-model="filters.maxIngredients" :min="0" />
+      </el-form-item>
+
+      <el-form-item>
+        <el-button type="primary" @click="fetchRecipes">Apply</el-button>
+        <el-button @click="resetFilters">Reset</el-button>
+      </el-form-item>
+    </el-form>
     <el-table :data="recipes" style="width: 100%" stripe>
       <el-table-column prop="title" label="Title" />
       <el-table-column prop="difficulty" label="Difficulty" />
@@ -20,9 +46,15 @@ Let user delete (DELETE /recipes/:id)
           {{ formatDate(scope.row.createdDate) }}
         </template>
       </el-table-column>
-      <el-table-column label="Actions" width="160">
+      <el-table-column label="Actions" width="240">
         <template #default="scope">
           <div style="display: flex; gap: 8px"></div>
+          <el-button
+            size="small"
+            @click="$router.push(`/recipes/${scope.row.id}`)"
+          >
+            View
+          </el-button>
           <el-button
             type="primary"
             size="small"
@@ -56,7 +88,7 @@ Let user delete (DELETE /recipes/:id)
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { getRecipes } from '@/api/recipes';
 import type { Recipe } from '@/types/Recipe';
 import { deleteRecipe } from '@/api/recipes';
@@ -68,27 +100,41 @@ const recipes = ref<Recipe[]>([]);
 const currentPage = ref(1);
 const pageSize = 5;
 const total = ref(0);
+const filters = reactive({
+  title: '',
+  difficulty: '',
+  minIngredients: null,
+  maxIngredients: null,
+});
+
+const resetFilters = () => {
+  filters.title = '';
+  filters.difficulty = '';
+  filters.minIngredients = null;
+  filters.maxIngredients = null;
+  currentPage.value = 1;
+  fetchRecipes();
+};
 
 const fetchRecipes = async () => {
-
   try {
-    const params = { page: currentPage.value - 1, size: pageSize };
+    const params = {
+      page: currentPage.value - 1,
+      size: pageSize,
+      ...(filters.title && { title: filters.title }),
+      ...(filters.difficulty && { difficulty: filters.difficulty }),
+      ...(filters.minIngredients != null && { minIngredients: filters.minIngredients }),
+      ...(filters.maxIngredients != null && { maxIngredients: filters.maxIngredients }),
+    };
+
     const response = await getRecipes(params);
     const data = response.data;
 
-    if (Array.isArray(data)) {
-      recipes.value = data;
-      total.value = data.length;
-    } else if (data?.content) {
-      recipes.value = data.content;
-      total.value = data.totalElements ?? data.content.length;
-    } else {
-      console.warn('Unexpected API response shape:', data);
-    }
+    recipes.value = data.content || [];
+    total.value = data.totalElements || 0;
   } catch (error) {
     console.error('Failed to fetch recipes:', error);
   }
-
 };
 
 const confirmDelete = (id: number) => {

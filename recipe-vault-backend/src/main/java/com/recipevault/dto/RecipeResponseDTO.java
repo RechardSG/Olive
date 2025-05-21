@@ -17,5 +17,6 @@ public class RecipeResponseDTO {
     private String creatorName;
     private LocalDateTime createdDate;
     private List<String> ingredients;
-
+    public void setImageUrl(String imageUrl) {
+    }
 }
