@@ -35,9 +35,10 @@ recipe-vault-frontend/
     <el-container>
       <el-header
         height="60px"
-        style="background: #409EFF; color: white; display: flex; align-items: center; padding-left: 20px;"
+        style="background: linear-gradient(to right, #c9dc5c, #a3c73d, #5ea443); color: #ffffff; display: flex; align-items: center; padding-left: 20px;"
       >
-        <h2 style="margin: 0;">🍽️ Recipe Vault Dashboard</h2>
+        <img src="/olive-icon.png" alt="Olive Logo" style="height: 40px; margin-right: 12px;" />
+        <h2 style="margin: 0;">Recipe Vault Dashboard</h2>
       </el-header>
 
       <el-main style="padding: 40px; background-color: #f5f7fa;">
@@ -67,15 +68,15 @@ function handleMenuClick(index) {
 <style>
 body {
   margin: 0;
-  font-family: 'Orbitron', sans-serif;
-  background-color: #121212;
-  color: #f0f0f0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #0e101a;
+  color: #d9e4ff;
 }
 
 .el-card {
   background-color: #1e1e2f;
   border: 1px solid #2c2c3e;
-  color: #e0e0e0;
+  color: #c5d9ff;
 }
 
 .el-button--primary {
