@@ -12,7 +12,7 @@ Let user delete (DELETE /recipes/:id)
       </el-form-item>
 
       <el-form-item label="Difficulty">
-        <el-select v-model="filters.difficulty" placeholder="All" clearable>
+        <el-select v-model="filters.difficulty" placeholder="All" clearable style="min-width: 150px;">
           <el-option label="Easy" value="EASY" />
           <el-option label="Medium" value="MEDIUM" />
           <el-option label="Hard" value="HARD" />

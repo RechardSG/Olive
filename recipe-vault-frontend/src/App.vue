@@ -9,24 +9,98 @@ recipe-vault-frontend/
 -->
 
 <!--App.vue as the main container, homepage-->
-
 <template>
   <el-container style="min-height: 100vh;">
-    <el-header style="background-color: #409EFF; color: white; padding: 1rem;">
-      <el-menu mode="horizontal" :default-active="$route.path" router>
-        <el-menu-item index="/">Recipe List</el-menu-item>
-        <el-menu-item index="/add">Add Recipe</el-menu-item>
+    <!-- Sidebar -->
+    <el-aside width="220px" style="background-color: #2d3a4b; color: white;">
+      <el-menu
+        :default-active="$route.path"
+        router
+        class="el-menu-vertical-demo"
+        background-color="#2d3a4b"
+        text-color="#fff"
+        active-text-color="#409EFF"
+      >
+        <el-menu-item index="/">
+          <el-icon><List /></el-icon>
+          <span>Recipe List</span>
+        </el-menu-item>
+        <el-menu-item index="/add">
+          <el-icon><Plus /></el-icon>
+          <span>Add Recipe</span>
+        </el-menu-item>
       </el-menu>
-    </el-header>
+    </el-aside>
 
-    <el-main style="padding: 2rem;">
-      <router-view />
-    </el-main>
+    <el-container>
+      <el-header
+        height="60px"
+        style="background: #409EFF; color: white; display: flex; align-items: center; padding-left: 20px;"
+      >
+        <h2 style="margin: 0;">🍽️ Recipe Vault Dashboard</h2>
+      </el-header>
+
+      <el-main style="padding: 40px; background-color: #f5f7fa;">
+        <router-view />
+      </el-main>
+
+      <el-footer height="40px" style="text-align: center; color: #999;">
+        © 2025 Recipe Vault
+      </el-footer>
+    </el-container>
   </el-container>
 </template>
 
-<script>
-export default {
-  name: 'App'
-};
+<script setup>
+import { ref } from 'vue';
+import RecipeList from './components/RecipeList.vue';
+import AddRecipe from './components/AddRecipe.vue';
+import { List, Plus } from '@element-plus/icons-vue';
+
+const activeTab = ref('list');
+
+function handleMenuClick(index) {
+  activeTab.value = index;
+}
 </script>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+.el-card {
+  background-color: #1e1e2f;
+  border: 1px solid #2c2c3e;
+  color: #e0e0e0;
+}
+
+.el-button--primary {
+  background-color: #00bcd4;
+  border-color: #00bcd4;
+}
+
+.el-input__inner,
+.el-select .el-input__inner {
+  background-color: #2b2b3b;
+  border-color: #444;
+  color: #fff;
+}
+
+.el-table th {
+  background-color: #1b1b2b;
+  color: #a8dadc;
+}
+
+.el-pagination {
+  --el-color-primary: #00bcd4;
+}
+
+.el-form-item__label {
+  color: #90caf9;
+}
+
+</style>
